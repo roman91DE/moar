@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "Moar"
+version = "0.1.0"
+dependencies = [
+ "crossterm",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -93,13 +100,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "nanoo2"
-version = "0.1.0"
-dependencies = [
- "crossterm",
 ]
 
 [[package]]

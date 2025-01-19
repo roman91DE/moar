@@ -48,32 +48,26 @@ impl Terminal {
         disable_raw_mode()
     }
     pub fn redraw_terminal(&mut self, buffer: &[String]) -> Result<()> {
-        let mut lines_available = self.y_max as isize;
-        let mut offset: u16 = 0;
-        queue!(self.stdout, Clear(ClearType::All))?;
-
-        for (i, line) in buffer
-            .iter()
-            .enumerate()
-        {
+        let mut lines_available = self.y_max as isize; // Total lines available on the terminal screen
+        queue!(self.stdout, Clear(ClearType::All))?; // Clear the terminal before redrawing
+    
+        for (i, line) in buffer.iter().enumerate() {
             if lines_available <= 0 {
-                break;
+                break; // Stop rendering if no more lines are available
             }
-
-            let line_chunks = (line.len() as u16).div_ceil(self.x_max);
-            offset += line_chunks;
-            let lines_used = std::cmp::min(line_chunks as isize, lines_available);
-
-            queue!(self.stdout, MoveTo(0, i as u16 + offset))?;
-            queue!(self.stdout, Print(line))?;
-
-            lines_available -= lines_used;
+    
+            let line_chunks = (line.len() as u16 + self.x_max - 1) / self.x_max; // Calculate how many terminal rows the line occupies
+            let lines_used = std::cmp::min(line_chunks as isize, lines_available); // Ensure we don't overflow the terminal height
+    
+            queue!(self.stdout, MoveTo(0, i as u16))?; // Position cursor at the correct line
+            queue!(self.stdout, Print(line))?; // Print the line content
+    
+            lines_available -= lines_used; // Update available lines count
         }
-
-        queue!(self.stdout, MoveTo(0, 0))?;
-        self.stdout
-            .flush()
+    
+        self.stdout.flush() // Ensure the output is rendered
     }
+    
 }
 
 pub struct Args {
@@ -125,7 +119,7 @@ impl Moar {
                         KeyCode::Char('q') => {
                             self.kill = true; // Quit on 'q'
                         }
-                        KeyCode::Down => {
+                        KeyCode::Down  => {
                             if self.start_line
                                 + (self
                                     .terminal
